@@ -33,15 +33,10 @@ RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nestjs
 
 # Copy the built application
-COPY --from=builder /app/public ./public
 COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/package.json ./package.json
 COPY --from=builder /app/prisma ./prisma
-
-# Set the correct permission for prerender cache
-RUN mkdir .next
-RUN chown nestjs:nodejs .next
 
 USER nestjs
 
