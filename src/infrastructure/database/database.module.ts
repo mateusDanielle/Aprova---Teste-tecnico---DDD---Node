@@ -27,4 +27,4 @@ import { LoanRepository } from './repositories/loan.repository';
     'ILoanRepository',
   ],
 })
-export class DatabaseModule { }
+export class DatabaseModule {}
