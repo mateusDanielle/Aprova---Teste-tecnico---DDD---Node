@@ -10,5 +10,67 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// This is an empty Prisma schema file,
-// ready for you to add your models.
+enum UserCategory {
+  TEACHER
+  STUDENT
+  LIBRARIAN
+}
+
+enum LoanStatus {
+  ACTIVE
+  RETURNED
+  OVERDUE
+}
+
+model User {
+  id        String       @id @default(cuid())
+  name      String
+  city      String
+  category  UserCategory
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+
+  // Relations
+  loans Loan[]
+
+  @@map("users")
+}
+
+model Book {
+  id        String   @id @default(cuid())
+  name      String
+  year      Int
+  publisher String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  loans Loan[]
+
+  // Indexes for performance
+  @@index([name])
+  @@index([publisher])
+  @@map("books")
+}
+
+model Loan {
+  id         String     @id @default(cuid())
+  userId     String
+  bookId     String
+  loanDate   DateTime   @default(now())
+  returnDate DateTime
+  status     LoanStatus @default(ACTIVE)
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  book Book @relation(fields: [bookId], references: [id], onDelete: Cascade)
+
+  // Indexes for performance
+  @@index([userId])
+  @@index([bookId])
+  @@index([status])
+  @@index([returnDate])
+  @@map("loans")
+}
