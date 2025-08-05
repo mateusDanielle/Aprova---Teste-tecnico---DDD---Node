@@ -36,7 +36,7 @@ docker-compose --version
 
 ```bash
 git clone <repository-url>
-cd library-management-system
+cd aprova-teste-tecnico-ddd-node
 ```
 
 ### 2. Instale as dependências
@@ -285,10 +285,10 @@ npm run db:studio          # Abre Prisma Studio
 
 ```bash
 # Construir imagem
-docker build -t library-management-system .
+docker build -t aprova-teste-tecnico-ddd-node .
 
 # Executar container
-docker run -p 3000:3000 library-management-system
+docker run -p 3000:3000 aprova-teste-tecnico-ddd-node
 
 # Usar Docker Compose
 docker-compose up --build
