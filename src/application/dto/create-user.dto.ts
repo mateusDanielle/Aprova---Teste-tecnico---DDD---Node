@@ -1,5 +1,5 @@
-import { IsString, IsEnum, IsNotEmpty } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
+import { IsString, IsNotEmpty, IsEnum } from 'class-validator';
 import { UserCategory } from '../../domain';
 
 export class CreateUserDto {
