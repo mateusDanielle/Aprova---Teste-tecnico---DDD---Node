@@ -20,6 +20,7 @@
     "test:e2e": "jest --config ./test/jest-e2e.json",
     "db:clean": "node scripts/clean-db.js",
     "db:check": "node scripts/check-db.js",
+    "db:seed": "node scripts/seed.js",
     "prepare": "husky"
   },
   "dependencies": {
@@ -84,9 +85,12 @@
     "testEnvironment": "node"
   },
   "lint-staged": {
-    "*.{ts,js,json,md}": [
+    "*.{ts,json,md}": [
       "prettier --write",
       "eslint --fix"
+    ],
+    "*.js": [
+      "prettier --write"
     ]
   }
 }

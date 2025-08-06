@@ -147,6 +147,7 @@ npm run test:watch
 #### 1. Via Swagger UI
 
 Após iniciar a aplicação, acesse:
+
 ```
 http://localhost:3000/api
 ```
@@ -222,6 +223,15 @@ npx prisma migrate status
 
 # Criar nova migração
 npx prisma migrate dev --name nome-da-migracao
+
+# Popular banco com dados de exemplo (opcional)
+npm run db:seed
+
+# Limpar dados do banco
+npm run db:clean
+
+# Verificar dados no banco
+npm run db:check
 ```
 
 ## 🏗️ Estrutura do Projeto
@@ -298,6 +308,7 @@ docker-compose down
 ### Docker Compose
 
 O arquivo `docker-compose.yml` inclui:
+
 - **PostgreSQL**: Banco de dados
 - **Redis**: Cache (opcional)
 - **App**: Aplicação NestJS
