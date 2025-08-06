@@ -8,17 +8,17 @@ async function bootstrap() {
 
   const configService = app.get(AppConfigService);
 
-  // Setup Swagger
-  setupSwagger(app);
-
   // Enable CORS
   app.enableCors({
     origin: configService.corsOrigin,
     credentials: configService.corsCredentials,
   });
 
-  // Global prefix
+  // Global prefix (DEVE vir ANTES do Swagger)
   app.setGlobalPrefix(configService.apiPrefix);
+
+  // Setup Swagger (DEVE vir DEPOIS do prefixo global)
+  setupSwagger(app);
 
   await app.listen(configService.port);
 

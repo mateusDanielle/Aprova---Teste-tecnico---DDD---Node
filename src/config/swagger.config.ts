@@ -21,5 +21,9 @@ export const setupSwagger = (app: INestApplication): void => {
       persistAuthorization: true,
     },
     customSiteTitle: 'Library Management API',
+    customCss: `
+      .swagger-ui .topbar .download-url-wrapper { display: none }
+      .swagger-ui .info .title { font-size: 2.5em; }
+    `,
   });
 };
