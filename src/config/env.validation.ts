@@ -18,13 +18,6 @@ const envSchema = z.object({
   API_PREFIX: z.string().default('api'),
   API_VERSION: z.string().default('v1'),
 
-  // JWT (for future authentication)
-  JWT_SECRET: z
-    .string()
-    .min(32, 'JWT_SECRET must be at least 32 characters')
-    .optional(),
-  JWT_EXPIRES_IN: z.string().default('7d'),
-
   // Logging
   LOG_LEVEL: z.enum(['error', 'warn', 'info', 'debug']).default('debug'),
 
@@ -35,9 +28,6 @@ const envSchema = z.object({
   // Rate Limiting
   RATE_LIMIT_TTL: z.coerce.number().positive().default(60),
   RATE_LIMIT_LIMIT: z.coerce.number().positive().default(100),
-
-  // Redis (optional)
-  REDIS_URL: z.string().url().optional(),
 });
 
 export type EnvConfig = z.infer<typeof envSchema>;

@@ -63,8 +63,9 @@ DATABASE_URL="postgresql://username:password@localhost:5432/library_db"
 PORT=3000
 NODE_ENV=development
 
-# JWT (para autenticação futura)
-JWT_SECRET=your-secret-key
+# Application
+PORT=3000
+NODE_ENV=development
 ```
 
 ### 4. Configure o banco de dados
@@ -166,8 +167,8 @@ curl -X POST http://localhost:3000/api/users \
   -H "Content-Type: application/json" \
   -d '{
     "name": "João Silva",
-    "email": "joao@example.com",
-    "userType": "STUDENT"
+    "city": "São Paulo",
+    "category": "STUDENT"
   }'
 ```
 
@@ -338,7 +339,7 @@ docker-compose down
 O arquivo `docker-compose.yml` inclui:
 
 - **PostgreSQL**: Banco de dados
-- **Redis**: Cache (opcional)
+
 - **App**: Aplicação NestJS
 
 ## 📚 Documentação

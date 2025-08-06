@@ -11,7 +11,6 @@ export const setupSwagger = (app: INestApplication): void => {
     .addTag('users', 'Operações relacionadas aos usuários')
     .addTag('books', 'Operações relacionadas aos livros')
     .addTag('loans', 'Operações relacionadas aos empréstimos')
-    .addBearerAuth()
     .build();
 
   const document = SwaggerModule.createDocument(app, config);

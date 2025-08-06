@@ -26,14 +26,6 @@ export class AppConfigService {
     return this.configService.get('API_VERSION', { infer: true });
   }
 
-  get jwtSecret(): string | undefined {
-    return this.configService.get('JWT_SECRET', { infer: true });
-  }
-
-  get jwtExpiresIn(): string {
-    return this.configService.get('JWT_EXPIRES_IN', { infer: true });
-  }
-
   get logLevel(): string {
     return this.configService.get('LOG_LEVEL', { infer: true });
   }
@@ -52,10 +44,6 @@ export class AppConfigService {
 
   get rateLimitLimit(): number {
     return this.configService.get('RATE_LIMIT_LIMIT', { infer: true });
-  }
-
-  get redisUrl(): string | undefined {
-    return this.configService.get('REDIS_URL', { infer: true });
   }
 
   get isDevelopment(): boolean {
