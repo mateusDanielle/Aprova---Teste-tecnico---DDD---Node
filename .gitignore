@@ -110,3 +110,6 @@ playwright-report/
 playwright/.cache/
 
 /generated/prisma
+
+# Scripts (keep these files)
+!scripts/
