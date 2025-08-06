@@ -171,7 +171,35 @@ curl -X POST http://localhost:3000/api/users \
   }'
 ```
 
-#### 3. Via Postman/Insomnia
+#### 3. Via VSCode REST Client (Recomendado)
+
+Arquivos `.http` organizados por domínio para testes rápidos:
+
+```bash
+# Abra qualquer arquivo .http no VSCode
+http/users.http      # Testes de usuários
+http/books.http      # Testes de livros
+http/loans.http      # Testes de empréstimos
+```
+
+**Pré-requisito**: Instale a extensão "REST Client" no VSCode
+
+**Como usar**:
+
+1. Abra um arquivo `.http` no VSCode
+2. Clique em "Send Request" acima de cada requisição
+3. Veja a resposta em uma nova aba
+
+**Vantagens**:
+
+- ✅ Execução rápida (um clique)
+- ✅ Organização por domínio
+- ✅ Testes de validação incluídos
+- ✅ Fluxos completos de teste
+- ✅ Integração nativa com VSCode
+- ✅ URLs diretas (sem configuração complexa)
+
+#### 4. Via Postman/Insomnia
 
 Importe a coleção do Swagger ou use os endpoints documentados em `/api`.
 

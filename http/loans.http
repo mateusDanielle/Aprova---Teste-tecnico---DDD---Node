@@ -1,0 +1,125 @@
+### Library Management System - Loans API
+### Base URL: http://localhost:3000/api
+
+### ========================================
+### EMPRESTAR LIVROS
+### ========================================
+
+### Empréstimo para Estudante (10 dias)
+POST http://localhost:3000/api/loans
+Content-Type: application/json
+
+{
+  "bookId": "book-id-here",
+  "userId": "student-id-here"
+}
+
+### Empréstimo para Professor (30 dias)
+POST http://localhost:3000/api/loans
+Content-Type: application/json
+
+{
+  "bookId": "book-id-here",
+  "userId": "teacher-id-here"
+}
+
+### Empréstimo para Bibliotecário (60 dias)
+POST http://localhost:3000/api/loans
+Content-Type: application/json
+
+{
+  "bookId": "book-id-here",
+  "userId": "librarian-id-here"
+}
+
+### ========================================
+### TESTES DE VALIDAÇÃO
+### ========================================
+
+### Teste: BookId vazio
+POST http://localhost:3000/api/loans
+Content-Type: application/json
+
+{
+  "bookId": "",
+  "userId": "user-id-here"
+}
+
+### Teste: UserId vazio
+POST http://localhost:3000/api/loans
+Content-Type: application/json
+
+{
+  "bookId": "book-id-here",
+  "userId": ""
+}
+
+### Teste: Dados incompletos
+POST http://localhost:3000/api/loans
+Content-Type: application/json
+
+{
+  "bookId": "book-id-here"
+}
+
+### Teste: Usuário inexistente
+POST http://localhost:3000/api/loans
+Content-Type: application/json
+
+{
+  "bookId": "book-id-here",
+  "userId": "non-existent-user-id"
+}
+
+### Teste: Livro inexistente
+POST http://localhost:3000/api/loans
+Content-Type: application/json
+
+{
+  "bookId": "non-existent-book-id",
+  "userId": "user-id-here"
+}
+
+### Teste: Livro já emprestado
+POST http://localhost:3000/api/loans
+Content-Type: application/json
+
+{
+  "bookId": "already-loaned-book-id",
+  "userId": "user-id-here"
+}
+
+### ========================================
+### FLUXO COMPLETO DE TESTE
+### ========================================
+
+### 1. Criar usuário estudante
+# @name createStudent
+POST http://localhost:3000/api/users
+Content-Type: application/json
+
+{
+  "name": "João Silva",
+  "city": "São Paulo",
+  "category": "STUDENT"
+}
+
+### 2. Criar livro
+# @name createBook
+POST http://localhost:3000/api/books
+Content-Type: application/json
+
+{
+  "name": "O Senhor dos Anéis",
+  "year": 1954,
+  "publisher": "Allen & Unwin"
+}
+
+### 3. Emprestar livro (usar IDs das respostas anteriores)
+POST http://localhost:3000/api/loans
+Content-Type: application/json
+
+{
+  "bookId": "{{createBook.response.body.id}}",
+  "userId": "{{createStudent.response.body.id}}"
+}

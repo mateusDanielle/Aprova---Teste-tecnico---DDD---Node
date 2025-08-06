@@ -1,0 +1,107 @@
+### Library Management System - Books API
+### Base URL: http://localhost:3000/api
+
+### ========================================
+### CADASTRAR LIVROS
+### ========================================
+
+### Cadastrar Livro Clássico
+POST http://localhost:3000/api/books
+Content-Type: application/json
+
+{
+  "name": "O Senhor dos Anéis",
+  "year": 1954,
+  "publisher": "Allen & Unwin"
+}
+
+### Cadastrar Livro Brasileiro
+POST http://localhost:3000/api/books
+Content-Type: application/json
+
+{
+  "name": "Dom Casmurro",
+  "year": 1899,
+  "publisher": "Livraria Garnier"
+}
+
+### Cadastrar Livro Moderno
+POST http://localhost:3000/api/books
+Content-Type: application/json
+
+{
+  "name": "1984",
+  "year": 1949,
+  "publisher": "Secker & Warburg"
+}
+
+### ========================================
+### PESQUISAR LIVROS
+### ========================================
+
+### Pesquisar por "senhor"
+GET http://localhost:3000/api/books/search?q=senhor
+
+### Pesquisar por "dom"
+GET http://localhost:3000/api/books/search?q=dom
+
+### Pesquisar por "1984"
+GET http://localhost:3000/api/books/search?q=1984
+
+### Pesquisar por "anéis"
+GET http://localhost:3000/api/books/search?q=anéis
+
+### Pesquisar vazia (deve retornar todos)
+GET http://localhost:3000/api/books/search?q=
+
+### ========================================
+### TESTES DE VALIDAÇÃO
+### ========================================
+
+### Teste: Nome vazio
+POST http://localhost:3000/api/books
+Content-Type: application/json
+
+{
+  "name": "",
+  "year": 1954,
+  "publisher": "Allen & Unwin"
+}
+
+### Teste: Ano inválido (muito antigo)
+POST http://localhost:3000/api/books
+Content-Type: application/json
+
+{
+  "name": "Livro Antigo",
+  "year": 1000,
+  "publisher": "Editora Antiga"
+}
+
+### Teste: Ano futuro
+POST http://localhost:3000/api/books
+Content-Type: application/json
+
+{
+  "name": "Livro Futuro",
+  "year": 2030,
+  "publisher": "Editora Futura"
+}
+
+### Teste: Editora vazia
+POST http://localhost:3000/api/books
+Content-Type: application/json
+
+{
+  "name": "Livro Sem Editora",
+  "year": 1954,
+  "publisher": ""
+}
+
+### Teste: Dados incompletos
+POST http://localhost:3000/api/books
+Content-Type: application/json
+
+{
+  "name": "Livro Incompleto"
+}

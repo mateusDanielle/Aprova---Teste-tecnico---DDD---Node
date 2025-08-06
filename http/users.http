@@ -1,0 +1,78 @@
+### Library Management System - Users API
+### Base URL: http://localhost:3000/api
+
+### ========================================
+### CADASTRAR USUÁRIOS
+### ========================================
+
+### Cadastrar Estudante
+POST http://localhost:3000/api/users
+Content-Type: application/json
+
+{
+  "name": "João Silva",
+  "city": "São Paulo",
+  "category": "STUDENT"
+}
+
+### Cadastrar Professor
+POST http://localhost:3000/api/users
+Content-Type: application/json
+
+{
+  "name": "Maria Santos",
+  "city": "Rio de Janeiro",
+  "category": "TEACHER"
+}
+
+### Cadastrar Bibliotecário
+POST http://localhost:3000/api/users
+Content-Type: application/json
+
+{
+  "name": "Pedro Oliveira",
+  "city": "Belo Horizonte",
+  "category": "LIBRARIAN"
+}
+
+### ========================================
+### TESTES DE VALIDAÇÃO
+### ========================================
+
+### Teste: Nome vazio
+POST http://localhost:3000/api/users
+Content-Type: application/json
+
+{
+  "name": "",
+  "city": "São Paulo",
+  "category": "STUDENT"
+}
+
+### Teste: Cidade vazia
+POST http://localhost:3000/api/users
+Content-Type: application/json
+
+{
+  "name": "João Silva",
+  "city": "",
+  "category": "STUDENT"
+}
+
+### Teste: Categoria inválida
+POST http://localhost:3000/api/users
+Content-Type: application/json
+
+{
+  "name": "João Silva",
+  "city": "São Paulo",
+  "category": "INVALID"
+}
+
+### Teste: Dados incompletos
+POST http://localhost:3000/api/users
+Content-Type: application/json
+
+{
+  "name": "João Silva"
+}
