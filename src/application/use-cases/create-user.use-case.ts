@@ -1,6 +1,6 @@
 import { Injectable, Inject } from '@nestjs/common';
-import { User } from '../../domain';
 import type { IUserRepository } from '../../domain';
+import { User, Name, UserCategoryVO } from '../../domain';
 import { CreateUserDto } from '../dto/create-user.dto';
 
 @Injectable()
@@ -11,10 +11,13 @@ export class CreateUserUseCase {
   ) {}
 
   async execute(createUserDto: CreateUserDto): Promise<{ id: string }> {
+    const name = Name.create(createUserDto.name);
+    const category = UserCategoryVO.create(createUserDto.category);
+
     const user = User.create({
-      name: createUserDto.name,
+      name,
       city: createUserDto.city,
-      category: createUserDto.category,
+      category,
     });
 
     const createdUser = await this.userRepository.create(user);

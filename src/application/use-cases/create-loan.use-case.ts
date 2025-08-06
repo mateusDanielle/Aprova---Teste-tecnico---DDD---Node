@@ -1,10 +1,10 @@
 import { Injectable, Inject, BadRequestException } from '@nestjs/common';
-import { Loan } from '../../domain';
 import type {
   IUserRepository,
   IBookRepository,
   ILoanRepository,
 } from '../../domain';
+import { Loan, UserCategoryVO } from '../../domain';
 import { CreateLoanDto } from '../dto/create-loan.dto';
 
 @Injectable()
@@ -19,37 +19,32 @@ export class CreateLoanUseCase {
   ) {}
 
   async execute(createLoanDto: CreateLoanDto): Promise<{ returnDate: Date }> {
-    // Verificar se o usuário existe
     const user = await this.userRepository.findById(createLoanDto.userId);
     if (!user) {
-      throw new BadRequestException('Usuário não encontrado');
+      throw new BadRequestException('User not found');
     }
 
-    // Verificar se o livro existe
     const book = await this.bookRepository.findById(createLoanDto.bookId);
     if (!book) {
-      throw new BadRequestException('Livro não encontrado');
+      throw new BadRequestException('Book not found');
     }
 
-    // Verificar se o livro já está emprestado
     const activeLoan = await this.loanRepository.findActiveByBookId(
       createLoanDto.bookId,
     );
     if (activeLoan) {
-      throw new BadRequestException('Livro já está emprestado');
+      throw new BadRequestException('Book is already loaned');
     }
 
-    // Criar o empréstimo com a data de devolução baseada na categoria do usuário
+    const userCategory = UserCategoryVO.create(user.category.getValue());
     const loan = Loan.create(
-      {
-        userId: createLoanDto.userId,
-        bookId: createLoanDto.bookId,
-      },
-      user.category,
+      createLoanDto.userId,
+      createLoanDto.bookId,
+      userCategory,
     );
 
-    await this.loanRepository.create(loan);
+    const createdLoan = await this.loanRepository.create(loan);
 
-    return { returnDate: loan.returnDate };
+    return { returnDate: createdLoan.returnDate };
   }
 }

@@ -12,10 +12,10 @@ export class SearchBooksUseCase {
   async execute(searchTerm: string): Promise<{ books: BookResponseDto[] }> {
     const books = await this.bookRepository.searchByName(searchTerm);
 
-    const bookResponses = books.map((book) => ({
+    const bookResponses: BookResponseDto[] = books.map((book) => ({
       id: book.id,
       name: book.name,
-      year: book.year,
+      year: book.year.getValue(),
       publisher: book.publisher,
       createdAt: book.createdAt,
       updatedAt: book.updatedAt,
