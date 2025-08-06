@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
-import { Book } from '../../../domain';
-import { IBookRepository } from '../../../domain/repositories/book.repository.interface';
 import { PrismaService } from '../prisma.service';
+import { Book, BookYear } from '../../../domain';
+import type { IBookRepository } from '../../../domain';
 
 @Injectable()
 export class BookRepository implements IBookRepository {
@@ -10,19 +10,16 @@ export class BookRepository implements IBookRepository {
   async create(book: Book): Promise<Book> {
     const createdBook = await this.prisma.book.create({
       data: {
-        id: book.id,
         name: book.name,
-        year: book.year,
+        year: book.year.getValue(),
         publisher: book.publisher,
-        createdAt: book.createdAt,
-        updatedAt: book.updatedAt,
       },
     });
 
     return new Book({
       id: createdBook.id,
       name: createdBook.name,
-      year: createdBook.year,
+      year: BookYear.create(createdBook.year),
       publisher: createdBook.publisher,
       createdAt: createdBook.createdAt,
       updatedAt: createdBook.updatedAt,
@@ -41,7 +38,7 @@ export class BookRepository implements IBookRepository {
     return new Book({
       id: book.id,
       name: book.name,
-      year: book.year,
+      year: BookYear.create(book.year),
       publisher: book.publisher,
       createdAt: book.createdAt,
       updatedAt: book.updatedAt,
@@ -56,7 +53,7 @@ export class BookRepository implements IBookRepository {
         new Book({
           id: book.id,
           name: book.name,
-          year: book.year,
+          year: BookYear.create(book.year),
           publisher: book.publisher,
           createdAt: book.createdAt,
           updatedAt: book.updatedAt,
@@ -64,11 +61,11 @@ export class BookRepository implements IBookRepository {
     );
   }
 
-  async searchByName(name: string): Promise<Book[]> {
+  async searchByName(searchTerm: string): Promise<Book[]> {
     const books = await this.prisma.book.findMany({
       where: {
         name: {
-          contains: name,
+          contains: searchTerm,
           mode: 'insensitive',
         },
       },
@@ -79,7 +76,7 @@ export class BookRepository implements IBookRepository {
         new Book({
           id: book.id,
           name: book.name,
-          year: book.year,
+          year: BookYear.create(book.year),
           publisher: book.publisher,
           createdAt: book.createdAt,
           updatedAt: book.updatedAt,
@@ -92,16 +89,15 @@ export class BookRepository implements IBookRepository {
       where: { id: book.id },
       data: {
         name: book.name,
-        year: book.year,
+        year: book.year.getValue(),
         publisher: book.publisher,
-        updatedAt: new Date(),
       },
     });
 
     return new Book({
       id: updatedBook.id,
       name: updatedBook.name,
-      year: updatedBook.year,
+      year: BookYear.create(updatedBook.year),
       publisher: updatedBook.publisher,
       createdAt: updatedBook.createdAt,
       updatedAt: updatedBook.updatedAt,

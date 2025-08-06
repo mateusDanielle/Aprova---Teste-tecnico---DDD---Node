@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
-import { User, UserCategory } from '../../../domain';
-import { IUserRepository } from '../../../domain/repositories/user.repository.interface';
 import { PrismaService } from '../prisma.service';
+import { User, Name, UserCategoryVO } from '../../../domain';
+import type { IUserRepository } from '../../../domain';
 
 @Injectable()
 export class UserRepository implements IUserRepository {
@@ -10,20 +10,17 @@ export class UserRepository implements IUserRepository {
   async create(user: User): Promise<User> {
     const createdUser = await this.prisma.user.create({
       data: {
-        id: user.id,
-        name: user.name,
+        name: user.name.getValue(),
         city: user.city,
-        category: user.category,
-        createdAt: user.createdAt,
-        updatedAt: user.updatedAt,
+        category: user.category.getValue(),
       },
     });
 
     return new User({
       id: createdUser.id,
-      name: createdUser.name,
+      name: Name.create(createdUser.name),
       city: createdUser.city,
-      category: createdUser.category as UserCategory,
+      category: UserCategoryVO.create(createdUser.category),
       createdAt: createdUser.createdAt,
       updatedAt: createdUser.updatedAt,
     });
@@ -40,9 +37,9 @@ export class UserRepository implements IUserRepository {
 
     return new User({
       id: user.id,
-      name: user.name,
+      name: Name.create(user.name),
       city: user.city,
-      category: user.category as UserCategory,
+      category: UserCategoryVO.create(user.category),
       createdAt: user.createdAt,
       updatedAt: user.updatedAt,
     });
@@ -55,9 +52,9 @@ export class UserRepository implements IUserRepository {
       (user) =>
         new User({
           id: user.id,
-          name: user.name,
+          name: Name.create(user.name),
           city: user.city,
-          category: user.category as UserCategory,
+          category: UserCategoryVO.create(user.category),
           createdAt: user.createdAt,
           updatedAt: user.updatedAt,
         }),
@@ -68,18 +65,17 @@ export class UserRepository implements IUserRepository {
     const updatedUser = await this.prisma.user.update({
       where: { id: user.id },
       data: {
-        name: user.name,
+        name: user.name.getValue(),
         city: user.city,
-        category: user.category,
-        updatedAt: new Date(),
+        category: user.category.getValue(),
       },
     });
 
     return new User({
       id: updatedUser.id,
-      name: updatedUser.name,
+      name: Name.create(updatedUser.name),
       city: updatedUser.city,
-      category: updatedUser.category as UserCategory,
+      category: UserCategoryVO.create(updatedUser.category),
       createdAt: updatedUser.createdAt,
       updatedAt: updatedUser.updatedAt,
     });
