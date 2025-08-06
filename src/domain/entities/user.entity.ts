@@ -1,23 +1,19 @@
-export enum UserCategory {
-  TEACHER = 'TEACHER',
-  STUDENT = 'STUDENT',
-  LIBRARIAN = 'LIBRARIAN',
-}
+import { Name, UserCategoryVO } from '../value-objects';
 
 export interface UserProps {
   id?: string;
-  name: string;
+  name: Name;
   city: string;
-  category: UserCategory;
+  category: UserCategoryVO;
   createdAt?: Date;
   updatedAt?: Date;
 }
 
 export class User {
   public readonly id: string;
-  public readonly name: string;
+  public readonly name: Name;
   public readonly city: string;
-  public readonly category: UserCategory;
+  public readonly category: UserCategoryVO;
   public readonly createdAt: Date;
   public readonly updatedAt: Date;
 
@@ -39,9 +35,9 @@ export class User {
   public toJSON() {
     return {
       id: this.id,
-      name: this.name,
+      name: this.name.getValue(),
       city: this.city,
-      category: this.category,
+      category: this.category.getValue(),
       createdAt: this.createdAt,
       updatedAt: this.updatedAt,
     };

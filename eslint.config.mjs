@@ -35,6 +35,7 @@ export default tseslint.config(
       'prettier/prettier': 'error',
       'object-curly-spacing': 'off',
       '@typescript-eslint/object-curly-spacing': 'off',
+      '@typescript-eslint/no-unsafe-assignment': 'off',
     },
   },
 );

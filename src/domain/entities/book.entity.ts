@@ -1,7 +1,9 @@
+import { BookYear } from '../value-objects';
+
 export interface BookProps {
   id?: string;
   name: string;
-  year: number;
+  year: BookYear;
   publisher: string;
   createdAt?: Date;
   updatedAt?: Date;
@@ -10,7 +12,7 @@ export interface BookProps {
 export class Book {
   public readonly id: string;
   public readonly name: string;
-  public readonly year: number;
+  public readonly year: BookYear;
   public readonly publisher: string;
   public readonly createdAt: Date;
   public readonly updatedAt: Date;
@@ -34,7 +36,7 @@ export class Book {
     return {
       id: this.id,
       name: this.name,
-      year: this.year,
+      year: this.year.getValue(),
       publisher: this.publisher,
       createdAt: this.createdAt,
       updatedAt: this.updatedAt,

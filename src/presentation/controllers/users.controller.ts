@@ -1,37 +1,18 @@
-import { Controller, Post, Body, HttpCode, HttpStatus } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
+import { Controller, Post, Body } from '@nestjs/common';
 import { CreateUserUseCase } from '../../application/use-cases/create-user.use-case';
 import { CreateUserDto } from '../../application/dto/create-user.dto';
+import { UserResponseDto } from '../../application/dto/user-response.dto';
+import { ApiCreateResponse } from '../../shared/decorators';
+import { ValidateEntity } from '../../shared/decorators';
 
-@ApiTags('users')
 @Controller('users')
+@ValidateEntity()
 export class UsersController {
   constructor(private readonly createUserUseCase: CreateUserUseCase) {}
 
   @Post()
-  @HttpCode(HttpStatus.CREATED)
-  @ApiOperation({
-    summary: 'Cadastrar usuário',
-    description: 'Cria um novo usuário na biblioteca',
-  })
-  @ApiResponse({
-    status: 201,
-    description: 'Usuário criado com sucesso',
-    schema: {
-      type: 'object',
-      properties: {
-        id: {
-          type: 'string',
-          example: 'clx1234567890abcdef',
-        },
-      },
-    },
-  })
-  @ApiResponse({
-    status: 400,
-    description: 'Dados inválidos',
-  })
-  async create(@Body() createUserDto: CreateUserDto): Promise<{ id: string }> {
+  @ApiCreateResponse(UserResponseDto)
+  async createUser(@Body() createUserDto: CreateUserDto) {
     return this.createUserUseCase.execute(createUserDto);
   }
 }
