@@ -3,9 +3,11 @@ import { INestApplication } from '@nestjs/common';
 import request from 'supertest';
 import { AppModule } from '../../app.module';
 import { UserCategory } from '../../domain';
+import { PrismaClient } from '@prisma/client';
 
 describe('UsersController (e2e)', () => {
   let app: INestApplication;
+  let prisma: PrismaClient;
 
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -14,10 +16,27 @@ describe('UsersController (e2e)', () => {
 
     app = moduleFixture.createNestApplication();
     await app.init();
+
+    prisma = new PrismaClient();
   });
 
   afterAll(async () => {
+    await prisma.$disconnect();
     await app.close();
+  });
+
+  beforeEach(async () => {
+    // Limpar dados antes de cada teste
+    await prisma.loan.deleteMany({});
+    await prisma.book.deleteMany({});
+    await prisma.user.deleteMany({});
+  });
+
+  afterEach(async () => {
+    // Limpeza adicional após cada teste
+    await prisma.loan.deleteMany({});
+    await prisma.book.deleteMany({});
+    await prisma.user.deleteMany({});
   });
 
   describe('POST /users', () => {

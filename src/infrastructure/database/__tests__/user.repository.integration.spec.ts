@@ -20,10 +20,26 @@ describe('UserRepository Integration', () => {
   });
 
   beforeEach(async () => {
-    // Limpar dados de teste
-    const users = await userRepository.findAll();
-    for (const user of users) {
-      await userRepository.delete(user.id);
+    // Limpar dados de teste de forma mais robusta
+    try {
+      const users = await userRepository.findAll();
+      for (const user of users) {
+        await userRepository.delete(user.id);
+      }
+    } catch (error) {
+      console.warn('Erro ao limpar usuários:', error.message);
+    }
+  });
+
+  afterEach(async () => {
+    // Limpeza adicional após cada teste
+    try {
+      const users = await userRepository.findAll();
+      for (const user of users) {
+        await userRepository.delete(user.id);
+      }
+    } catch (error) {
+      console.warn('Erro ao limpar usuários após teste:', error.message);
     }
   });
 

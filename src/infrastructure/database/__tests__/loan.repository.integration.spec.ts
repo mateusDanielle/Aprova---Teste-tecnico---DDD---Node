@@ -28,7 +28,41 @@ describe('LoanRepository Integration', () => {
   });
 
   beforeEach(async () => {
-    // Limpar dados de teste de forma segura
+    // Limpar dados de teste de forma mais robusta
+    try {
+      const loans = await loanRepository.findAll();
+      for (const loan of loans) {
+        try {
+          await loanRepository.delete(loan.id);
+        } catch (error) {
+          // Ignorar erros de deleção
+        }
+      }
+
+      const users = await userRepository.findAll();
+      for (const user of users) {
+        try {
+          await userRepository.delete(user.id);
+        } catch (error) {
+          // Ignorar erros de deleção
+        }
+      }
+
+      const books = await bookRepository.findAll();
+      for (const book of books) {
+        try {
+          await bookRepository.delete(book.id);
+        } catch (error) {
+          // Ignorar erros de deleção
+        }
+      }
+    } catch (error) {
+      // Ignorar erros gerais de limpeza
+    }
+  });
+
+  afterEach(async () => {
+    // Limpeza adicional após cada teste
     try {
       const loans = await loanRepository.findAll();
       for (const loan of loans) {
