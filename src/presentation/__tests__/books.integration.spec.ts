@@ -97,11 +97,17 @@ describe('Books Integration (e2e)', () => {
   describe('GET /api/books/search', () => {
     it('should search books by name', async () => {
       // Criar um livro primeiro
-      await request(app.getHttpServer()).post('/api/books').send({
-        name: 'O Senhor dos Anéis',
-        year: 1954,
-        publisher: 'Allen & Unwin',
-      });
+      await request(app.getHttpServer())
+        .post('/api/books')
+        .send({
+          name: 'O Senhor dos Anéis',
+          year: 1954,
+          publisher: 'Allen & Unwin',
+        })
+        .expect(201);
+
+      // Aguardar um pouco para garantir que o livro foi criado
+      await new Promise((resolve) => setTimeout(resolve, 100));
 
       const response = await request(app.getHttpServer())
         .get('/api/books/search?q=senhor')

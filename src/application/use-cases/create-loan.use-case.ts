@@ -16,7 +16,7 @@ export class CreateLoanUseCase {
     private readonly bookRepository: IBookRepository,
     @Inject('ILoanRepository')
     private readonly loanRepository: ILoanRepository,
-  ) { }
+  ) {}
 
   async execute(createLoanDto: CreateLoanDto) {
     const user = await this.userRepository.findById(createLoanDto.userId);

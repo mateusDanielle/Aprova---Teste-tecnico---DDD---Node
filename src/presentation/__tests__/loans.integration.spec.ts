@@ -25,10 +25,14 @@ describe('Loans Integration (e2e)', () => {
   });
 
   beforeEach(async () => {
-    // Limpar o banco antes de cada teste
-    await prisma.loan.deleteMany();
-    await prisma.user.deleteMany();
-    await prisma.book.deleteMany();
+    // Limpar o banco antes de cada teste de forma mais robusta
+    try {
+      await prisma.loan.deleteMany();
+      await prisma.user.deleteMany();
+      await prisma.book.deleteMany();
+    } catch {
+      // Ignorar erros de limpeza
+    }
   });
 
   afterAll(async () => {
@@ -45,7 +49,8 @@ describe('Loans Integration (e2e)', () => {
           name: 'João Silva',
           city: 'São Paulo',
           category: 'STUDENT',
-        });
+        })
+        .expect(201);
 
       // Criar livro primeiro
       const bookResponse = await request(app.getHttpServer())
@@ -54,7 +59,8 @@ describe('Loans Integration (e2e)', () => {
           name: 'O Senhor dos Anéis',
           year: 1954,
           publisher: 'Allen & Unwin',
-        });
+        })
+        .expect(201);
 
       const createLoanDto = {
         userId: userResponse.body.id,
@@ -78,7 +84,8 @@ describe('Loans Integration (e2e)', () => {
           name: 'Maria Santos',
           city: 'Rio de Janeiro',
           category: 'TEACHER',
-        });
+        })
+        .expect(201);
 
       // Criar livro primeiro
       const bookResponse = await request(app.getHttpServer())
@@ -87,7 +94,8 @@ describe('Loans Integration (e2e)', () => {
           name: 'Harry Potter e a Pedra Filosofal',
           year: 1997,
           publisher: 'Bloomsbury',
-        });
+        })
+        .expect(201);
 
       const createLoanDto = {
         userId: userResponse.body.id,
@@ -113,7 +121,8 @@ describe('Loans Integration (e2e)', () => {
           name: 'João Silva',
           city: 'São Paulo',
           category: 'STUDENT',
-        });
+        })
+        .expect(201);
 
       // Criar livro primeiro
       const bookResponse = await request(app.getHttpServer())
@@ -122,13 +131,17 @@ describe('Loans Integration (e2e)', () => {
           name: 'O Senhor dos Anéis',
           year: 1954,
           publisher: 'Allen & Unwin',
-        });
+        })
+        .expect(201);
 
       // Criar empréstimo
-      await request(app.getHttpServer()).post('/api/loans').send({
-        userId: userResponse.body.id,
-        bookId: bookResponse.body.id,
-      });
+      await request(app.getHttpServer())
+        .post('/api/loans')
+        .send({
+          userId: userResponse.body.id,
+          bookId: bookResponse.body.id,
+        })
+        .expect(201);
 
       const response = await request(app.getHttpServer())
         .get('/api/loans')

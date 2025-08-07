@@ -57,13 +57,17 @@ export class Loan {
   }
 
   public return(): void {
-    (this as any).status = LoanStatus.RETURNED;
-    (this as any).updatedAt = new Date();
+    if (this.status === LoanStatus.ACTIVE) {
+      (this as any).status = LoanStatus.RETURNED;
+      (this as any).updatedAt = new Date();
+    }
   }
 
   public markAsOverdue(): void {
-    (this as any).status = LoanStatus.OVERDUE;
-    (this as any).updatedAt = new Date();
+    if (this.status === LoanStatus.ACTIVE) {
+      (this as any).status = LoanStatus.OVERDUE;
+      (this as any).updatedAt = new Date();
+    }
   }
 
   public isOverdue(): boolean {

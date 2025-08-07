@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/unbound-method */
 import { Test, TestingModule } from '@nestjs/testing';
 import { CreateUserUseCase } from '../create-user.use-case';
 import { User, Name, UserCategoryVO, UserCategory } from '../../../domain';

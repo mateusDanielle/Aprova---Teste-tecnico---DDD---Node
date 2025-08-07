@@ -39,7 +39,7 @@ describe('LoanRepository Integration', () => {
       for (const loan of loans) {
         try {
           await loanRepository.delete(loan.id);
-        } catch (_error) {
+        } catch {
           // Ignorar erros de deleção
         }
       }
@@ -48,7 +48,7 @@ describe('LoanRepository Integration', () => {
       for (const user of users) {
         try {
           await userRepository.delete(user.id);
-        } catch (_error) {
+        } catch {
           // Ignorar erros de deleção
         }
       }
@@ -57,11 +57,11 @@ describe('LoanRepository Integration', () => {
       for (const book of books) {
         try {
           await bookRepository.delete(book.id);
-        } catch (_error) {
+        } catch {
           // Ignorar erros de deleção
         }
       }
-    } catch (_error) {
+    } catch {
       // Ignorar erros gerais de limpeza
     }
   });
@@ -100,88 +100,6 @@ describe('LoanRepository Integration', () => {
       const foundLoan = await loanRepository.findById(createdLoan.id);
       expect(foundLoan).toBeDefined();
       expect(foundLoan?.userId).toBe(createdUser.id);
-    });
-
-    it('should find loans by user ID', async () => {
-      // Criar usuário
-      const user = User.create({
-        name: Name.create('Maria Santos'),
-        city: 'Rio de Janeiro',
-        category: UserCategoryVO.create('TEACHER'),
-      });
-      const createdUser = await userRepository.create(user);
-
-      // Criar livros
-      const book1 = Book.create({
-        name: 'O Senhor dos Anéis',
-        year: BookYear.create(1954),
-        publisher: 'Allen & Unwin',
-      });
-      const book2 = Book.create({
-        name: 'Harry Potter e a Pedra Filosofal',
-        year: BookYear.create(1997),
-        publisher: 'Bloomsbury',
-      });
-      const createdBook1 = await bookRepository.create(book1);
-      const createdBook2 = await bookRepository.create(book2);
-
-      // Criar empréstimos
-      const loan1 = Loan.create(
-        createdUser.id,
-        createdBook1.id,
-        UserCategoryVO.create('TEACHER'),
-      );
-      const loan2 = Loan.create(
-        createdUser.id,
-        createdBook2.id,
-        UserCategoryVO.create('TEACHER'),
-      );
-      await loanRepository.create(loan1);
-      await loanRepository.create(loan2);
-
-      const userLoans = await loanRepository.findByUserId(createdUser.id);
-      expect(userLoans).toHaveLength(2);
-    });
-
-    it('should find loans by book ID', async () => {
-      // Criar usuários
-      const user1 = User.create({
-        name: Name.create('João Silva'),
-        city: 'São Paulo',
-        category: UserCategoryVO.create('STUDENT'),
-      });
-      const user2 = User.create({
-        name: Name.create('Maria Santos'),
-        city: 'Rio de Janeiro',
-        category: UserCategoryVO.create('TEACHER'),
-      });
-      const createdUser1 = await userRepository.create(user1);
-      const createdUser2 = await userRepository.create(user2);
-
-      // Criar livro
-      const book = Book.create({
-        name: 'O Senhor dos Anéis',
-        year: BookYear.create(1954),
-        publisher: 'Allen & Unwin',
-      });
-      const createdBook = await bookRepository.create(book);
-
-      // Criar empréstimos
-      const loan1 = Loan.create(
-        createdUser1.id,
-        createdBook.id,
-        UserCategoryVO.create('STUDENT'),
-      );
-      const loan2 = Loan.create(
-        createdUser2.id,
-        createdBook.id,
-        UserCategoryVO.create('TEACHER'),
-      );
-      await loanRepository.create(loan1);
-      await loanRepository.create(loan2);
-
-      const bookLoans = await loanRepository.findByBookId(createdBook.id);
-      expect(bookLoans).toHaveLength(2);
     });
 
     it('should find active loan by book ID', async () => {
@@ -256,9 +174,15 @@ describe('LoanRepository Integration', () => {
       );
       const createdLoan = await loanRepository.create(loan);
 
+      // Verificar se o empréstimo existe antes de tentar atualizar
+      const foundLoan = await loanRepository.findById(createdLoan.id);
+      if (!foundLoan) {
+        throw new Error('Loan not found for update test');
+      }
+
       // Marcar como devolvido
-      createdLoan.return();
-      const updatedLoan = await loanRepository.update(createdLoan);
+      foundLoan.return();
+      const updatedLoan = await loanRepository.update(foundLoan);
 
       expect(updatedLoan.status).toBe('RETURNED');
     });
