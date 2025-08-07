@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { CreateUserUseCase } from '../create-user.use-case';
-import { User, UserCategory } from '../../../domain';
+import { User, Name, UserCategoryVO, UserCategory } from '../../../domain';
 import type { IUserRepository } from '../../../domain';
 
 describe('CreateUserUseCase', () => {
@@ -38,19 +38,24 @@ describe('CreateUserUseCase', () => {
         category: UserCategory.STUDENT,
       };
 
-      const mockUser = User.create(createUserDto);
+      const mockUser = User.create({
+        name: Name.create('João Silva'),
+        city: 'São Paulo',
+        category: UserCategoryVO.create('STUDENT'),
+      });
+
       mockUserRepository.create.mockResolvedValue(mockUser);
 
       const result = await useCase.execute(createUserDto);
 
+      expect(result).toEqual({ id: mockUser.id });
       expect(mockUserRepository.create).toHaveBeenCalledWith(
         expect.objectContaining({
-          name: createUserDto.name,
-          city: createUserDto.city,
-          category: createUserDto.category,
+          name: expect.any(Object), // Name Value Object
+          city: 'São Paulo',
+          category: expect.any(Object), // UserCategoryVO Value Object
         }),
       );
-      expect(result).toEqual({ id: mockUser.id });
     });
 
     it('should create a TEACHER user', async () => {
@@ -60,7 +65,12 @@ describe('CreateUserUseCase', () => {
         category: UserCategory.TEACHER,
       };
 
-      const mockUser = User.create(createUserDto);
+      const mockUser = User.create({
+        name: Name.create('Maria Santos'),
+        city: 'Rio de Janeiro',
+        category: UserCategoryVO.create('TEACHER'),
+      });
+
       mockUserRepository.create.mockResolvedValue(mockUser);
 
       const result = await useCase.execute(createUserDto);
@@ -68,7 +78,9 @@ describe('CreateUserUseCase', () => {
       expect(result).toEqual({ id: mockUser.id });
       expect(mockUserRepository.create).toHaveBeenCalledWith(
         expect.objectContaining({
-          category: UserCategory.TEACHER,
+          name: expect.any(Object),
+          city: 'Rio de Janeiro',
+          category: expect.any(Object),
         }),
       );
     });
@@ -80,7 +92,12 @@ describe('CreateUserUseCase', () => {
         category: UserCategory.LIBRARIAN,
       };
 
-      const mockUser = User.create(createUserDto);
+      const mockUser = User.create({
+        name: Name.create('Pedro Costa'),
+        city: 'Belo Horizonte',
+        category: UserCategoryVO.create('LIBRARIAN'),
+      });
+
       mockUserRepository.create.mockResolvedValue(mockUser);
 
       const result = await useCase.execute(createUserDto);
@@ -88,7 +105,9 @@ describe('CreateUserUseCase', () => {
       expect(result).toEqual({ id: mockUser.id });
       expect(mockUserRepository.create).toHaveBeenCalledWith(
         expect.objectContaining({
-          category: UserCategory.LIBRARIAN,
+          name: expect.any(Object),
+          city: 'Belo Horizonte',
+          category: expect.any(Object),
         }),
       );
     });

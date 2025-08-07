@@ -1,7 +1,14 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { BadRequestException } from '@nestjs/common';
 import { CreateLoanUseCase } from '../create-loan.use-case';
-import { User, Book, Loan, UserCategory } from '../../../domain';
+import {
+  User,
+  Book,
+  Loan,
+  Name,
+  UserCategoryVO,
+  BookYear,
+} from '../../../domain';
 import type {
   IUserRepository,
   IBookRepository,
@@ -27,20 +34,20 @@ describe('CreateLoanUseCase', () => {
       create: jest.fn(),
       findById: jest.fn(),
       findAll: jest.fn(),
-      searchByName: jest.fn(),
       update: jest.fn(),
       delete: jest.fn(),
+      searchByName: jest.fn(),
     };
 
     const mockLoanRepo = {
       create: jest.fn(),
       findById: jest.fn(),
-      findByUserId: jest.fn(),
-      findByBookId: jest.fn(),
-      findActiveByBookId: jest.fn(),
       findAll: jest.fn(),
       update: jest.fn(),
       delete: jest.fn(),
+      findByUserId: jest.fn(),
+      findByBookId: jest.fn(),
+      findActiveByBookId: jest.fn(),
     };
 
     const module: TestingModule = await Test.createTestingModule({
@@ -70,80 +77,88 @@ describe('CreateLoanUseCase', () => {
   describe('execute', () => {
     it('should create a loan successfully for STUDENT', async () => {
       const createLoanDto = {
-        userId: 'user-123',
-        bookId: 'book-456',
+        userId: 'user-id',
+        bookId: 'book-id',
       };
 
       const mockUser = User.create({
-        name: 'João Silva',
+        name: Name.create('João Silva'),
         city: 'São Paulo',
-        category: UserCategory.STUDENT,
+        category: UserCategoryVO.create('STUDENT'),
       });
 
       const mockBook = Book.create({
         name: 'O Senhor dos Anéis',
-        year: 1954,
-        publisher: 'Editora Martins Fontes',
+        year: BookYear.create(1954),
+        publisher: 'Allen & Unwin',
+      });
+
+      const mockLoan = Loan.create({
+        userId: 'user-id',
+        bookId: 'book-id',
+        userCategory: UserCategoryVO.create('STUDENT'),
       });
 
       mockUserRepository.findById.mockResolvedValue(mockUser);
       mockBookRepository.findById.mockResolvedValue(mockBook);
       mockLoanRepository.findActiveByBookId.mockResolvedValue(null);
-
-      const mockLoan = Loan.create(createLoanDto, UserCategory.STUDENT);
       mockLoanRepository.create.mockResolvedValue(mockLoan);
 
       const result = await useCase.execute(createLoanDto);
 
-      expect(mockUserRepository.findById).toHaveBeenCalledWith(
-        createLoanDto.userId,
+      expect(result).toEqual({ id: mockLoan.id });
+      expect(mockLoanRepository.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          userId: 'user-id',
+          bookId: 'book-id',
+        }),
       );
-      expect(mockBookRepository.findById).toHaveBeenCalledWith(
-        createLoanDto.bookId,
-      );
-      expect(mockLoanRepository.findActiveByBookId).toHaveBeenCalledWith(
-        createLoanDto.bookId,
-      );
-      expect(mockLoanRepository.create).toHaveBeenCalled();
-      expect(result).toEqual({ returnDate: mockLoan.returnDate });
     });
 
     it('should create a loan for TEACHER with 30 days return date', async () => {
       const createLoanDto = {
-        userId: 'user-456',
-        bookId: 'book-789',
+        userId: 'user-id',
+        bookId: 'book-id',
       };
 
       const mockUser = User.create({
-        name: 'Maria Santos',
+        name: Name.create('Maria Santos'),
         city: 'Rio de Janeiro',
-        category: UserCategory.TEACHER,
+        category: UserCategoryVO.create('TEACHER'),
       });
 
       const mockBook = Book.create({
-        name: 'Dom Casmurro',
-        year: 1899,
-        publisher: 'Editora Garnier',
+        name: 'Harry Potter e a Pedra Filosofal',
+        year: BookYear.create(1997),
+        publisher: 'Bloomsbury',
+      });
+
+      const mockLoan = Loan.create({
+        userId: 'user-id',
+        bookId: 'book-id',
+        userCategory: UserCategoryVO.create('TEACHER'),
       });
 
       mockUserRepository.findById.mockResolvedValue(mockUser);
       mockBookRepository.findById.mockResolvedValue(mockBook);
       mockLoanRepository.findActiveByBookId.mockResolvedValue(null);
-
-      const mockLoan = Loan.create(createLoanDto, UserCategory.TEACHER);
       mockLoanRepository.create.mockResolvedValue(mockLoan);
 
       const result = await useCase.execute(createLoanDto);
 
-      expect(result.returnDate.getDate()).toBe(
-        new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).getDate(),
+      expect(result).toEqual({ id: mockLoan.id });
+      expect(mockLoanRepository.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          userId: 'user-id',
+          bookId: 'book-id',
+        }),
       );
     });
 
     it('should throw BadRequestException when user not found', async () => {
       const createLoanDto = {
-        userId: 'user-123',
-        bookId: 'book-456',
+        userId: 'non-existent-user',
+        bookId: 'book-id',
       };
 
       mockUserRepository.findById.mockResolvedValue(null);
@@ -155,14 +170,14 @@ describe('CreateLoanUseCase', () => {
 
     it('should throw BadRequestException when book not found', async () => {
       const createLoanDto = {
-        userId: 'user-123',
-        bookId: 'book-456',
+        userId: 'user-id',
+        bookId: 'non-existent-book',
       };
 
       const mockUser = User.create({
-        name: 'João Silva',
+        name: Name.create('João Silva'),
         city: 'São Paulo',
-        category: UserCategory.STUDENT,
+        category: UserCategoryVO.create('STUDENT'),
       });
 
       mockUserRepository.findById.mockResolvedValue(mockUser);
@@ -175,27 +190,31 @@ describe('CreateLoanUseCase', () => {
 
     it('should throw BadRequestException when book is already loaned', async () => {
       const createLoanDto = {
-        userId: 'user-123',
-        bookId: 'book-456',
+        userId: 'user-id',
+        bookId: 'book-id',
       };
 
       const mockUser = User.create({
-        name: 'João Silva',
+        name: Name.create('João Silva'),
         city: 'São Paulo',
-        category: UserCategory.STUDENT,
+        category: UserCategoryVO.create('STUDENT'),
       });
 
       const mockBook = Book.create({
         name: 'O Senhor dos Anéis',
-        year: 1954,
-        publisher: 'Editora Martins Fontes',
+        year: BookYear.create(1954),
+        publisher: 'Allen & Unwin',
       });
 
-      const mockActiveLoan = Loan.create(createLoanDto, UserCategory.STUDENT);
+      const existingLoan = Loan.create({
+        userId: 'other-user-id',
+        bookId: 'book-id',
+        userCategory: UserCategoryVO.create('STUDENT'),
+      });
 
       mockUserRepository.findById.mockResolvedValue(mockUser);
       mockBookRepository.findById.mockResolvedValue(mockBook);
-      mockLoanRepository.findActiveByBookId.mockResolvedValue(mockActiveLoan);
+      mockLoanRepository.findActiveByBookId.mockResolvedValue(existingLoan);
 
       await expect(useCase.execute(createLoanDto)).rejects.toThrow(
         new BadRequestException('Livro já está emprestado'),

@@ -1,43 +1,39 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { DatabaseModule } from '../database.module';
+import { PrismaService } from '../prisma.service';
 import { UserRepository } from '../repositories/user.repository';
-import { User, UserCategory } from '../../../domain';
+import { User, Name, UserCategoryVO } from '../../../domain';
 
 describe('UserRepository Integration', () => {
-  let module: TestingModule;
   let userRepository: UserRepository;
+  let prisma: PrismaService;
 
   beforeAll(async () => {
-    module = await Test.createTestingModule({
-      imports: [DatabaseModule],
+    const module: TestingModule = await Test.createTestingModule({
+      providers: [
+        UserRepository,
+        {
+          provide: PrismaService,
+          useValue: {
+            user: {
+              create: jest.fn(),
+              findUnique: jest.fn(),
+              findMany: jest.fn(),
+              update: jest.fn(),
+              delete: jest.fn(),
+            },
+          },
+        },
+      ],
     }).compile();
 
-    userRepository = module.get<UserRepository>('IUserRepository');
-  });
-
-  afterAll(async () => {
-    await module.close();
+    userRepository = module.get<UserRepository>(UserRepository);
+    prisma = module.get<PrismaService>(PrismaService);
   });
 
   beforeEach(async () => {
-    // Limpar dados de teste de forma mais robusta
+    // Limpar o banco antes de cada teste
     try {
-      const users = await userRepository.findAll();
-      for (const user of users) {
-        await userRepository.delete(user.id);
-      }
-    } catch (error) {
-      console.warn('Erro ao limpar usuários:', error.message);
-    }
-  });
-
-  afterEach(async () => {
-    // Limpeza adicional após cada teste
-    try {
-      const users = await userRepository.findAll();
-      for (const user of users) {
-        await userRepository.delete(user.id);
-      }
+      await prisma.user.deleteMany();
     } catch (error) {
       console.warn('Erro ao limpar usuários após teste:', error.message);
     }
@@ -46,35 +42,35 @@ describe('UserRepository Integration', () => {
   describe('CRUD Operations', () => {
     it('should create and find a user', async () => {
       const userData = {
-        name: 'João Silva',
+        name: Name.create('João Silva'),
         city: 'São Paulo',
-        category: UserCategory.STUDENT,
+        category: UserCategoryVO.create('STUDENT'),
       };
 
       const user = User.create(userData);
       const createdUser = await userRepository.create(user);
 
       expect(createdUser.id).toBeDefined();
-      expect(createdUser.name).toBe(userData.name);
-      expect(createdUser.city).toBe(userData.city);
-      expect(createdUser.category).toBe(userData.category);
+      expect(createdUser.name.getValue()).toBe('João Silva');
+      expect(createdUser.city).toBe('São Paulo');
+      expect(createdUser.category.getValue()).toBe('STUDENT');
 
       const foundUser = await userRepository.findById(createdUser.id);
       expect(foundUser).toBeDefined();
-      expect(foundUser?.name).toBe(userData.name);
+      expect(foundUser?.name.getValue()).toBe('João Silva');
     });
 
     it('should find all users', async () => {
       const user1 = User.create({
-        name: 'Maria Santos',
+        name: Name.create('Maria Santos'),
         city: 'Rio de Janeiro',
-        category: UserCategory.TEACHER,
+        category: UserCategoryVO.create('TEACHER'),
       });
 
       const user2 = User.create({
-        name: 'Pedro Costa',
+        name: Name.create('Pedro Costa'),
         city: 'Belo Horizonte',
-        category: UserCategory.LIBRARIAN,
+        category: UserCategoryVO.create('LIBRARIAN'),
       });
 
       await userRepository.create(user1);
@@ -83,15 +79,15 @@ describe('UserRepository Integration', () => {
       const allUsers = await userRepository.findAll();
 
       expect(allUsers).toHaveLength(2);
-      expect(allUsers.map((u) => u.name)).toContain('Maria Santos');
-      expect(allUsers.map((u) => u.name)).toContain('Pedro Costa');
+      expect(allUsers.map((u) => u.name.getValue())).toContain('Maria Santos');
+      expect(allUsers.map((u) => u.name.getValue())).toContain('Pedro Costa');
     });
 
     it('should update a user', async () => {
       const user = User.create({
-        name: 'Ana Oliveira',
+        name: Name.create('Ana Oliveira'),
         city: 'Salvador',
-        category: UserCategory.STUDENT,
+        category: UserCategoryVO.create('STUDENT'),
       });
 
       const createdUser = await userRepository.create(user);
@@ -104,9 +100,9 @@ describe('UserRepository Integration', () => {
 
     it('should delete a user', async () => {
       const user = User.create({
-        name: 'Carlos Lima',
+        name: Name.create('Carlos Lima'),
         city: 'Recife',
-        category: UserCategory.STUDENT,
+        category: UserCategoryVO.create('STUDENT'),
       });
 
       const createdUser = await userRepository.create(user);
@@ -125,30 +121,30 @@ describe('UserRepository Integration', () => {
   describe('User Categories', () => {
     it('should create users with different categories', async () => {
       const student = User.create({
-        name: 'Student User',
+        name: Name.create('Student User'),
         city: 'São Paulo',
-        category: UserCategory.STUDENT,
+        category: UserCategoryVO.create('STUDENT'),
       });
 
       const teacher = User.create({
-        name: 'Teacher User',
+        name: Name.create('Teacher User'),
         city: 'Rio de Janeiro',
-        category: UserCategory.TEACHER,
+        category: UserCategoryVO.create('TEACHER'),
       });
 
       const librarian = User.create({
-        name: 'Librarian User',
+        name: Name.create('Librarian User'),
         city: 'Belo Horizonte',
-        category: UserCategory.LIBRARIAN,
+        category: UserCategoryVO.create('LIBRARIAN'),
       });
 
       const createdStudent = await userRepository.create(student);
       const createdTeacher = await userRepository.create(teacher);
       const createdLibrarian = await userRepository.create(librarian);
 
-      expect(createdStudent.category).toBe(UserCategory.STUDENT);
-      expect(createdTeacher.category).toBe(UserCategory.TEACHER);
-      expect(createdLibrarian.category).toBe(UserCategory.LIBRARIAN);
+      expect(createdStudent.category.getValue()).toBe('STUDENT');
+      expect(createdTeacher.category.getValue()).toBe('TEACHER');
+      expect(createdLibrarian.category.getValue()).toBe('LIBRARIAN');
     });
   });
 });

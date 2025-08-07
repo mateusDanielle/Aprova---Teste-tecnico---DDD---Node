@@ -1,51 +1,51 @@
-import { User, UserCategory } from '../user.entity';
+import { User } from '../user.entity';
+import { Name, UserCategoryVO } from '../../value-objects';
 
 describe('User Entity', () => {
   describe('create', () => {
-    it('should create a user with valid data', () => {
-      const userData = {
-        name: 'João Silva',
+    it('should create a user with STUDENT category', () => {
+      const user = User.create({
+        name: Name.create('João Silva'),
         city: 'São Paulo',
-        category: UserCategory.STUDENT,
-      };
+        category: UserCategoryVO.create('STUDENT'),
+      });
 
-      const user = User.create(userData);
-
-      expect(user.name).toBe(userData.name);
-      expect(user.city).toBe(userData.city);
-      expect(user.category).toBe(userData.category);
-      expect(user.id).toBeDefined();
-      expect(user.createdAt).toBeInstanceOf(Date);
-      expect(user.updatedAt).toBeInstanceOf(Date);
+      expect(user.name.getValue()).toBe('João Silva');
+      expect(user.city).toBe('São Paulo');
+      expect(user.category.getValue()).toBe('STUDENT');
     });
 
     it('should create a user with TEACHER category', () => {
       const user = User.create({
-        name: 'Maria Santos',
+        name: Name.create('Maria Santos'),
         city: 'Rio de Janeiro',
-        category: UserCategory.TEACHER,
+        category: UserCategoryVO.create('TEACHER'),
       });
 
-      expect(user.category).toBe(UserCategory.TEACHER);
+      expect(user.name.getValue()).toBe('Maria Santos');
+      expect(user.city).toBe('Rio de Janeiro');
+      expect(user.category.getValue()).toBe('TEACHER');
     });
 
     it('should create a user with LIBRARIAN category', () => {
       const user = User.create({
-        name: 'Pedro Costa',
+        name: Name.create('Pedro Costa'),
         city: 'Belo Horizonte',
-        category: UserCategory.LIBRARIAN,
+        category: UserCategoryVO.create('LIBRARIAN'),
       });
 
-      expect(user.category).toBe(UserCategory.LIBRARIAN);
+      expect(user.name.getValue()).toBe('Pedro Costa');
+      expect(user.city).toBe('Belo Horizonte');
+      expect(user.category.getValue()).toBe('LIBRARIAN');
     });
   });
 
   describe('toJSON', () => {
     it('should return user data as JSON', () => {
       const userData = {
-        name: 'Ana Oliveira',
+        name: Name.create('Ana Oliveira'),
         city: 'Salvador',
-        category: UserCategory.STUDENT,
+        category: UserCategoryVO.create('STUDENT'),
       };
 
       const user = User.create(userData);
@@ -53,9 +53,9 @@ describe('User Entity', () => {
 
       expect(json).toEqual({
         id: user.id,
-        name: userData.name,
-        city: userData.city,
-        category: userData.category,
+        name: 'Ana Oliveira',
+        city: 'Salvador',
+        category: 'STUDENT',
         createdAt: user.createdAt,
         updatedAt: user.updatedAt,
       });
