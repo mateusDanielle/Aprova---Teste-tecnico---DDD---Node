@@ -1,41 +1,29 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { PrismaService } from '../prisma.service';
+import { DatabaseModule } from '../database.module';
 import { BookRepository } from '../repositories/book.repository';
 import { Book, BookYear } from '../../../domain';
 
 describe('BookRepository Integration', () => {
+  let module: TestingModule;
   let bookRepository: BookRepository;
-  let prisma: PrismaService;
 
   beforeAll(async () => {
-    const module: TestingModule = await Test.createTestingModule({
-      providers: [
-        BookRepository,
-        {
-          provide: PrismaService,
-          useValue: {
-            book: {
-              create: jest.fn(),
-              findUnique: jest.fn(),
-              findMany: jest.fn(),
-              update: jest.fn(),
-              delete: jest.fn(),
-            },
-          },
-        },
-      ],
+    module = await Test.createTestingModule({
+      imports: [DatabaseModule],
     }).compile();
 
-    bookRepository = module.get<BookRepository>(BookRepository);
-    prisma = module.get<PrismaService>(PrismaService);
+    bookRepository = module.get<BookRepository>('IBookRepository');
+  });
+
+  afterAll(async () => {
+    await module.close();
   });
 
   beforeEach(async () => {
-    // Limpar o banco antes de cada teste
-    try {
-      await prisma.book.deleteMany();
-    } catch (error) {
-      console.warn('Erro ao limpar livros após teste:', error.message);
+    // Limpar dados de teste
+    const books = await bookRepository.findAll();
+    for (const book of books) {
+      await bookRepository.delete(book.id);
     }
   });
 
@@ -93,6 +81,10 @@ describe('BookRepository Integration', () => {
       });
 
       const createdBook = await bookRepository.create(book);
+
+      // Aguardar um pouco para garantir que o timestamp seja diferente
+      await new Promise((resolve) => setTimeout(resolve, 10));
+
       const updatedBook = await bookRepository.update(createdBook);
 
       expect(updatedBook.updatedAt.getTime()).toBeGreaterThan(

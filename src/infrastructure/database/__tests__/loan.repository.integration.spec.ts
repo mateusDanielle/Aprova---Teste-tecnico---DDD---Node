@@ -3,9 +3,14 @@ import { DatabaseModule } from '../database.module';
 import { LoanRepository } from '../repositories/loan.repository';
 import { UserRepository } from '../repositories/user.repository';
 import { BookRepository } from '../repositories/book.repository';
-import { Loan, LoanStatus, UserCategory } from '../../../domain';
-import { User } from '../../../domain/entities/user.entity';
-import { Book } from '../../../domain/entities/book.entity';
+import {
+  User,
+  Book,
+  Loan,
+  Name,
+  UserCategoryVO,
+  BookYear,
+} from '../../../domain';
 
 describe('LoanRepository Integration', () => {
   let module: TestingModule;
@@ -34,7 +39,7 @@ describe('LoanRepository Integration', () => {
       for (const loan of loans) {
         try {
           await loanRepository.delete(loan.id);
-        } catch (error) {
+        } catch (_error) {
           // Ignorar erros de deleção
         }
       }
@@ -43,7 +48,7 @@ describe('LoanRepository Integration', () => {
       for (const user of users) {
         try {
           await userRepository.delete(user.id);
-        } catch (error) {
+        } catch (_error) {
           // Ignorar erros de deleção
         }
       }
@@ -52,45 +57,11 @@ describe('LoanRepository Integration', () => {
       for (const book of books) {
         try {
           await bookRepository.delete(book.id);
-        } catch (error) {
+        } catch (_error) {
           // Ignorar erros de deleção
         }
       }
-    } catch (error) {
-      // Ignorar erros gerais de limpeza
-    }
-  });
-
-  afterEach(async () => {
-    // Limpeza adicional após cada teste
-    try {
-      const loans = await loanRepository.findAll();
-      for (const loan of loans) {
-        try {
-          await loanRepository.delete(loan.id);
-        } catch (error) {
-          // Ignorar erros de deleção
-        }
-      }
-
-      const users = await userRepository.findAll();
-      for (const user of users) {
-        try {
-          await userRepository.delete(user.id);
-        } catch (error) {
-          // Ignorar erros de deleção
-        }
-      }
-
-      const books = await bookRepository.findAll();
-      for (const book of books) {
-        try {
-          await bookRepository.delete(book.id);
-        } catch (error) {
-          // Ignorar erros de deleção
-        }
-      }
-    } catch (error) {
+    } catch (_error) {
       // Ignorar erros gerais de limpeza
     }
   });
@@ -98,184 +69,190 @@ describe('LoanRepository Integration', () => {
   describe('CRUD Operations', () => {
     it('should create and find a loan', async () => {
       // Criar usuário primeiro
-      const user = await userRepository.create(
-        User.create({
-          name: 'João Silva',
-          city: 'São Paulo',
-          category: UserCategory.STUDENT,
-        }),
-      );
+      const user = User.create({
+        name: Name.create('João Silva'),
+        city: 'São Paulo',
+        category: UserCategoryVO.create('STUDENT'),
+      });
+      const createdUser = await userRepository.create(user);
 
       // Criar livro primeiro
-      const book = await bookRepository.create(
-        Book.create({
-          name: 'O Senhor dos Anéis',
-          year: 1954,
-          publisher: 'Editora Martins Fontes',
-        }),
+      const book = Book.create({
+        name: 'O Senhor dos Anéis',
+        year: BookYear.create(1954),
+        publisher: 'Allen & Unwin',
+      });
+      const createdBook = await bookRepository.create(book);
+
+      // Criar empréstimo
+      const loan = Loan.create(
+        createdUser.id,
+        createdBook.id,
+        UserCategoryVO.create('STUDENT'),
       );
-
-      const loanData = {
-        userId: user.id,
-        bookId: book.id,
-      };
-
-      const loan = Loan.create(loanData, UserCategory.STUDENT);
       const createdLoan = await loanRepository.create(loan);
 
       expect(createdLoan.id).toBeDefined();
-      expect(createdLoan.userId).toBe(loanData.userId);
-      expect(createdLoan.bookId).toBe(loanData.bookId);
-      expect(createdLoan.status).toBe(LoanStatus.ACTIVE);
+      expect(createdLoan.userId).toBe(createdUser.id);
+      expect(createdLoan.bookId).toBe(createdBook.id);
+      expect(createdLoan.status).toBe('ACTIVE');
 
       const foundLoan = await loanRepository.findById(createdLoan.id);
       expect(foundLoan).toBeDefined();
-      expect(foundLoan?.userId).toBe(loanData.userId);
+      expect(foundLoan?.userId).toBe(createdUser.id);
     });
 
     it('should find loans by user ID', async () => {
-      const user = await userRepository.create(
-        User.create({
-          name: 'Maria Santos',
-          city: 'Rio de Janeiro',
-          category: UserCategory.TEACHER,
-        }),
-      );
+      // Criar usuário
+      const user = User.create({
+        name: Name.create('Maria Santos'),
+        city: 'Rio de Janeiro',
+        category: UserCategoryVO.create('TEACHER'),
+      });
+      const createdUser = await userRepository.create(user);
 
-      const book1 = await bookRepository.create(
-        Book.create({
-          name: 'Dom Casmurro',
-          year: 1899,
-          publisher: 'Editora Garnier',
-        }),
-      );
+      // Criar livros
+      const book1 = Book.create({
+        name: 'O Senhor dos Anéis',
+        year: BookYear.create(1954),
+        publisher: 'Allen & Unwin',
+      });
+      const book2 = Book.create({
+        name: 'Harry Potter e a Pedra Filosofal',
+        year: BookYear.create(1997),
+        publisher: 'Bloomsbury',
+      });
+      const createdBook1 = await bookRepository.create(book1);
+      const createdBook2 = await bookRepository.create(book2);
 
-      const book2 = await bookRepository.create(
-        Book.create({
-          name: 'Grande Sertão: Veredas',
-          year: 1956,
-          publisher: 'Editora Nova Fronteira',
-        }),
-      );
-
+      // Criar empréstimos
       const loan1 = Loan.create(
-        { userId: user.id, bookId: book1.id },
-        UserCategory.TEACHER,
+        createdUser.id,
+        createdBook1.id,
+        UserCategoryVO.create('TEACHER'),
       );
       const loan2 = Loan.create(
-        { userId: user.id, bookId: book2.id },
-        UserCategory.TEACHER,
+        createdUser.id,
+        createdBook2.id,
+        UserCategoryVO.create('TEACHER'),
       );
-
       await loanRepository.create(loan1);
       await loanRepository.create(loan2);
 
-      const userLoans = await loanRepository.findByUserId(user.id);
+      const userLoans = await loanRepository.findByUserId(createdUser.id);
       expect(userLoans).toHaveLength(2);
     });
 
     it('should find loans by book ID', async () => {
-      const user1 = await userRepository.create(
-        User.create({
-          name: 'Pedro Costa',
-          city: 'Belo Horizonte',
-          category: UserCategory.STUDENT,
-        }),
-      );
+      // Criar usuários
+      const user1 = User.create({
+        name: Name.create('João Silva'),
+        city: 'São Paulo',
+        category: UserCategoryVO.create('STUDENT'),
+      });
+      const user2 = User.create({
+        name: Name.create('Maria Santos'),
+        city: 'Rio de Janeiro',
+        category: UserCategoryVO.create('TEACHER'),
+      });
+      const createdUser1 = await userRepository.create(user1);
+      const createdUser2 = await userRepository.create(user2);
 
-      const user2 = await userRepository.create(
-        User.create({
-          name: 'Ana Oliveira',
-          city: 'Salvador',
-          category: UserCategory.LIBRARIAN,
-        }),
-      );
+      // Criar livro
+      const book = Book.create({
+        name: 'O Senhor dos Anéis',
+        year: BookYear.create(1954),
+        publisher: 'Allen & Unwin',
+      });
+      const createdBook = await bookRepository.create(book);
 
-      const book = await bookRepository.create(
-        Book.create({
-          name: 'Vidas Secas',
-          year: 1938,
-          publisher: 'Editora Record',
-        }),
-      );
-
+      // Criar empréstimos
       const loan1 = Loan.create(
-        { userId: user1.id, bookId: book.id },
-        UserCategory.STUDENT,
+        createdUser1.id,
+        createdBook.id,
+        UserCategoryVO.create('STUDENT'),
       );
       const loan2 = Loan.create(
-        { userId: user2.id, bookId: book.id },
-        UserCategory.LIBRARIAN,
+        createdUser2.id,
+        createdBook.id,
+        UserCategoryVO.create('TEACHER'),
       );
-
       await loanRepository.create(loan1);
       await loanRepository.create(loan2);
 
-      const bookLoans = await loanRepository.findByBookId(book.id);
+      const bookLoans = await loanRepository.findByBookId(createdBook.id);
       expect(bookLoans).toHaveLength(2);
     });
 
     it('should find active loan by book ID', async () => {
-      const user = await userRepository.create(
-        User.create({
-          name: 'Carlos Lima',
-          city: 'Recife',
-          category: UserCategory.STUDENT,
-        }),
-      );
+      // Criar usuário
+      const user = User.create({
+        name: Name.create('João Silva'),
+        city: 'São Paulo',
+        category: UserCategoryVO.create('STUDENT'),
+      });
+      const createdUser = await userRepository.create(user);
 
-      const book = await bookRepository.create(
-        Book.create({
-          name: 'Capitães da Areia',
-          year: 1937,
-          publisher: 'Editora Record',
-        }),
-      );
+      // Criar livro
+      const book = Book.create({
+        name: 'O Senhor dos Anéis',
+        year: BookYear.create(1954),
+        publisher: 'Allen & Unwin',
+      });
+      const createdBook = await bookRepository.create(book);
 
+      // Criar empréstimo
       const loan = Loan.create(
-        { userId: user.id, bookId: book.id },
-        UserCategory.STUDENT,
+        createdUser.id,
+        createdBook.id,
+        UserCategoryVO.create('STUDENT'),
       );
       await loanRepository.create(loan);
 
-      const activeLoan = await loanRepository.findActiveByBookId(book.id);
+      const activeLoan = await loanRepository.findActiveByBookId(
+        createdBook.id,
+      );
       expect(activeLoan).toBeDefined();
-      expect(activeLoan?.status).toBe(LoanStatus.ACTIVE);
+      expect(activeLoan?.bookId).toBe(createdBook.id);
     });
 
     it('should return null when no active loan for book', async () => {
-      const book = await bookRepository.create(
-        Book.create({
-          name: 'Macunaíma',
-          year: 1928,
-          publisher: 'Editora Record',
-        }),
-      );
+      // Criar livro
+      const book = Book.create({
+        name: 'O Senhor dos Anéis',
+        year: BookYear.create(1954),
+        publisher: 'Allen & Unwin',
+      });
+      const createdBook = await bookRepository.create(book);
 
-      const activeLoan = await loanRepository.findActiveByBookId(book.id);
+      const activeLoan = await loanRepository.findActiveByBookId(
+        createdBook.id,
+      );
       expect(activeLoan).toBeNull();
     });
 
     it('should update a loan', async () => {
-      const user = await userRepository.create(
-        User.create({
-          name: 'Fernando Silva',
-          city: 'Fortaleza',
-          category: UserCategory.STUDENT,
-        }),
-      );
+      // Criar usuário
+      const user = User.create({
+        name: Name.create('João Silva'),
+        city: 'São Paulo',
+        category: UserCategoryVO.create('STUDENT'),
+      });
+      const createdUser = await userRepository.create(user);
 
-      const book = await bookRepository.create(
-        Book.create({
-          name: 'Iracema',
-          year: 1865,
-          publisher: 'Editora Record',
-        }),
-      );
+      // Criar livro
+      const book = Book.create({
+        name: 'O Senhor dos Anéis',
+        year: BookYear.create(1954),
+        publisher: 'Allen & Unwin',
+      });
+      const createdBook = await bookRepository.create(book);
 
+      // Criar empréstimo
       const loan = Loan.create(
-        { userId: user.id, bookId: book.id },
-        UserCategory.STUDENT,
+        createdUser.id,
+        createdBook.id,
+        UserCategoryVO.create('STUDENT'),
       );
       const createdLoan = await loanRepository.create(loan);
 
@@ -283,29 +260,31 @@ describe('LoanRepository Integration', () => {
       createdLoan.return();
       const updatedLoan = await loanRepository.update(createdLoan);
 
-      expect(updatedLoan.status).toBe(LoanStatus.RETURNED);
+      expect(updatedLoan.status).toBe('RETURNED');
     });
 
     it('should delete a loan', async () => {
-      const user = await userRepository.create(
-        User.create({
-          name: 'Roberto Santos',
-          city: 'Manaus',
-          category: UserCategory.TEACHER,
-        }),
-      );
+      // Criar usuário
+      const user = User.create({
+        name: Name.create('João Silva'),
+        city: 'São Paulo',
+        category: UserCategoryVO.create('STUDENT'),
+      });
+      const createdUser = await userRepository.create(user);
 
-      const book = await bookRepository.create(
-        Book.create({
-          name: 'O Guarani',
-          year: 1857,
-          publisher: 'Editora Record',
-        }),
-      );
+      // Criar livro
+      const book = Book.create({
+        name: 'O Senhor dos Anéis',
+        year: BookYear.create(1954),
+        publisher: 'Allen & Unwin',
+      });
+      const createdBook = await bookRepository.create(book);
 
+      // Criar empréstimo
       const loan = Loan.create(
-        { userId: user.id, bookId: book.id },
-        UserCategory.TEACHER,
+        createdUser.id,
+        createdBook.id,
+        UserCategoryVO.create('STUDENT'),
       );
       const createdLoan = await loanRepository.create(loan);
 
@@ -318,49 +297,50 @@ describe('LoanRepository Integration', () => {
 
   describe('Loan Status and Business Rules', () => {
     it('should create loans with correct return dates based on user category', async () => {
-      const student = await userRepository.create(
-        User.create({
-          name: 'Student User',
-          city: 'São Paulo',
-          category: UserCategory.STUDENT,
-        }),
-      );
+      // Criar usuários com diferentes categorias
+      const student = User.create({
+        name: Name.create('Student User'),
+        city: 'São Paulo',
+        category: UserCategoryVO.create('STUDENT'),
+      });
+      const teacher = User.create({
+        name: Name.create('Teacher User'),
+        city: 'Rio de Janeiro',
+        category: UserCategoryVO.create('TEACHER'),
+      });
+      const librarian = User.create({
+        name: Name.create('Librarian User'),
+        city: 'Belo Horizonte',
+        category: UserCategoryVO.create('LIBRARIAN'),
+      });
 
-      const teacher = await userRepository.create(
-        User.create({
-          name: 'Teacher User',
-          city: 'Rio de Janeiro',
-          category: UserCategory.TEACHER,
-        }),
-      );
+      const createdStudent = await userRepository.create(student);
+      const createdTeacher = await userRepository.create(teacher);
+      const createdLibrarian = await userRepository.create(librarian);
 
-      const librarian = await userRepository.create(
-        User.create({
-          name: 'Librarian User',
-          city: 'Belo Horizonte',
-          category: UserCategory.LIBRARIAN,
-        }),
-      );
+      // Criar livro
+      const book = Book.create({
+        name: 'O Senhor dos Anéis',
+        year: BookYear.create(1954),
+        publisher: 'Allen & Unwin',
+      });
+      const createdBook = await bookRepository.create(book);
 
-      const book = await bookRepository.create(
-        Book.create({
-          name: 'Test Book',
-          year: 2020,
-          publisher: 'Test Publisher',
-        }),
-      );
-
+      // Criar empréstimos
       const studentLoan = Loan.create(
-        { userId: student.id, bookId: book.id },
-        UserCategory.STUDENT,
+        createdStudent.id,
+        createdBook.id,
+        UserCategoryVO.create('STUDENT'),
       );
       const teacherLoan = Loan.create(
-        { userId: teacher.id, bookId: book.id },
-        UserCategory.TEACHER,
+        createdTeacher.id,
+        createdBook.id,
+        UserCategoryVO.create('TEACHER'),
       );
       const librarianLoan = Loan.create(
-        { userId: librarian.id, bookId: book.id },
-        UserCategory.LIBRARIAN,
+        createdLibrarian.id,
+        createdBook.id,
+        UserCategoryVO.create('LIBRARIAN'),
       );
 
       const createdStudentLoan = await loanRepository.create(studentLoan);

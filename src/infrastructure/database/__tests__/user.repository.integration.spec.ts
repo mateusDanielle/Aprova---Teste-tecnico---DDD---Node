@@ -1,41 +1,45 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { PrismaService } from '../prisma.service';
+import { DatabaseModule } from '../database.module';
 import { UserRepository } from '../repositories/user.repository';
 import { User, Name, UserCategoryVO } from '../../../domain';
 
 describe('UserRepository Integration', () => {
+  let module: TestingModule;
   let userRepository: UserRepository;
-  let prisma: PrismaService;
 
   beforeAll(async () => {
-    const module: TestingModule = await Test.createTestingModule({
-      providers: [
-        UserRepository,
-        {
-          provide: PrismaService,
-          useValue: {
-            user: {
-              create: jest.fn(),
-              findUnique: jest.fn(),
-              findMany: jest.fn(),
-              update: jest.fn(),
-              delete: jest.fn(),
-            },
-          },
-        },
-      ],
+    module = await Test.createTestingModule({
+      imports: [DatabaseModule],
     }).compile();
 
-    userRepository = module.get<UserRepository>(UserRepository);
-    prisma = module.get<PrismaService>(PrismaService);
+    userRepository = module.get<UserRepository>('IUserRepository');
+  });
+
+  afterAll(async () => {
+    await module.close();
   });
 
   beforeEach(async () => {
-    // Limpar o banco antes de cada teste
+    // Limpar dados de teste de forma mais robusta
     try {
-      await prisma.user.deleteMany();
+      const users = await userRepository.findAll();
+      for (const user of users) {
+        await userRepository.delete(user.id);
+      }
     } catch (error) {
-      console.warn('Erro ao limpar usuários após teste:', error.message);
+      console.warn('Erro ao limpar usuários:', error.message);
+    }
+  });
+
+  afterEach(async () => {
+    // Limpeza adicional após cada teste
+    try {
+      const users = await userRepository.findAll();
+      for (const user of users) {
+        await userRepository.delete(user.id);
+      }
+    } catch (error) {
+      console.warn('Erro ao limpar usuários:', error.message);
     }
   });
 
