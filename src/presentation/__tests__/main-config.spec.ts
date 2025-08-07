@@ -2,8 +2,9 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
 import request from 'supertest';
 import { AppModule } from '../../app.module';
+import { AppConfigService } from '../../config/config.service';
 
-describe('Simple Routes Test (e2e)', () => {
+describe('Main Configuration (e2e)', () => {
   let app: INestApplication;
 
   beforeAll(async () => {
@@ -12,11 +13,21 @@ describe('Simple Routes Test (e2e)', () => {
     }).compile();
 
     app = moduleFixture.createNestApplication();
+
+    // Simular a configuração do main.ts
+    const configService = app.get(AppConfigService);
+    app.setGlobalPrefix(configService.apiPrefix);
+
     await app.init();
   });
 
   afterAll(async () => {
     await app.close();
+  });
+
+  it('should have global prefix configured', () => {
+    const configService = app.get(AppConfigService);
+    expect(configService.apiPrefix).toBe('api');
   });
 
   it('should return 200 for /api/users', async () => {
