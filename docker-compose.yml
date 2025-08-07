@@ -21,6 +21,25 @@ services:
       timeout: 5s
       retries: 5
 
+  postgres_test:
+    image: postgres:15-alpine
+    container_name: library_postgres_test
+    environment:
+      POSTGRES_DB: library_test_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_test_data:/var/lib/postgresql/data
+    networks:
+      - library_network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
   app:
     build:
       context: .
@@ -44,6 +63,7 @@ services:
 
 volumes:
   postgres_data:
+  postgres_test_data:
 
 networks:
   library_network:

@@ -263,6 +263,28 @@ npm run db:clean
 npm run db:check
 ```
 
+### Banco de Dados de Testes
+
+O projeto utiliza um **banco de dados separado para testes** para garantir isolamento completo:
+
+```bash
+# Configurar ambiente de testes (primeira vez)
+npm run test:setup
+
+# Executar testes com banco separado
+npm run test:db
+```
+
+**Vantagens:**
+
+- ✅ **Isolamento completo** - Testes não interferem com dados de desenvolvimento
+- ✅ **Performance** - Banco limpo a cada teste
+- ✅ **Confiabilidade** - Sem dependências de dados externos
+- ✅ **Simplicidade** - Não precisa rastrear IDs criados
+- ✅ **Unidade** - Usa o mesmo schema do projeto
+
+**Nota:** Com o banco de testes separado, não é necessário limpeza manual - cada execução de teste usa um banco limpo e isolado.
+
 ## 🏗️ Estrutura do Projeto
 
 ```

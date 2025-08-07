@@ -1,8 +1,10 @@
 #!/usr/bin/env sh
 . "$(dirname -- "$0")/_/husky.sh"
 
-echo "🧪 Running tests..."
-npm test
+echo "🧪 Executando testes com banco separado..."
+npm run test:db
 
-echo "🔍 Running lint-staged..."
+echo "🔍 Executando lint-staged..."
 npx lint-staged
+
+echo "✅ Pre-commit concluído com sucesso!"
